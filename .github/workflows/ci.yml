@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # En los PR, una ejecución nueva cancela la anterior; en main nunca se corta un despliegue.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  web:
+    name: Web
+    uses: modular-forge/ci-web/.github/workflows/web.yml@e7c85b3272bbf9c2ac9b7290ff8be322f5d86446 # v1.0.0
+    permissions:
+      contents: read # descargar el código
+      id-token: write # el despliegue entra en Tailscale con identidad federada
+    secrets:
+      # Solo existe en el entorno production; ci-web lo lee en el job que despliega.
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+    with:
+      site: portfolio
+      dist: dist/portfolio/browser
+      url: https://modular-forge.dev
+      ts-oauth-client-id: ${{ vars.TS_OAUTH_CLIENT_ID }}
+      ts-audience: ${{ vars.TS_AUDIENCE }}
+      known-hosts: ${{ vars.FORGE_KNOWN_HOSTS }}
