@@ -1,0 +1,8 @@
+{
+  "extends": ["stylelint-config-standard-scss"],
+  "ignoreFiles": ["dist/**", "coverage/**", ".angular/**"],
+  "rules": {
+    "selector-pseudo-element-no-unknown": [true, { "ignorePseudoElements": ["ng-deep"] }],
+    "no-empty-source": null
+  }
+}
