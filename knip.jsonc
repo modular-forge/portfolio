@@ -2,5 +2,5 @@
   // @angular-eslint/builder lo usa "ng lint" (angular.json) y lo instala el paquete angular-eslint.
   // Su instalador lo quita a propósito de package.json cuando se usa npm, así que no se declara
   // aparte: las migraciones de angular-eslint lo volverían a quitar.
-  "ignoreDependencies": ["@angular-eslint/builder"]
+  "ignoreDependencies": ["@angular-eslint/builder"],
 }
