@@ -10,7 +10,7 @@ updates:
       default-days: 7
     groups:
       acciones:
-        patterns: ["*"]
+        patterns: ['*']
   # Dependencias de npm. Las versiones mayores se hacen a mano (ng update aplica migraciones).
   - package-ecosystem: npm
     directory: /
@@ -21,10 +21,10 @@ updates:
       default-days: 7
     open-pull-requests-limit: 5
     ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     groups:
       angular:
-        patterns: ["@angular/*", "@angular-devkit/*", "@schematics/angular"]
+        patterns: ['@angular/*', '@angular-devkit/*', '@schematics/angular']
       resto:
-        patterns: ["*"]
+        patterns: ['*']
