@@ -9,7 +9,7 @@ permissions: {}
 
 concurrency:
   group: ci-${{ github.ref }}
-  # En los PR, una ejecución nueva cancela la anterior; en main nunca se corta un despliegue.
+  # On PRs a new run cancels the previous one; on main a deployment is never interrupted.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -17,10 +17,10 @@ jobs:
     name: Web
     uses: modular-forge/ci-web/.github/workflows/web.yml@e7c85b3272bbf9c2ac9b7290ff8be322f5d86446 # v1.0.0
     permissions:
-      contents: read # descargar el código
-      id-token: write # el despliegue entra en Tailscale con identidad federada
+      contents: read # check out the code
+      id-token: write # the deploy job joins Tailscale with workload identity federation
     secrets:
-      # Solo existe en el entorno production; ci-web lo lee en el job que despliega.
+      # Only exists in the production environment; ci-web reads it in the deploy job.
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
     with:
       site: portfolio

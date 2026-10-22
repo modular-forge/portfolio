@@ -1,0 +1,14 @@
+schema: spec-driven
+
+# Constraints an agent cannot infer from the code. CLAUDE.md and .claude/rules/ hold the rest.
+context: |
+  Write every artifact (proposal, specs, design, tasks) in English, even when the user writes in Spanish.
+  This repository is public: no secrets, personal data, internal hostnames or IPs, or details of the home server.
+  The site is a static prerendered Angular app with no server or backend at runtime.
+
+rules:
+  proposal:
+    - State what is out of scope.
+    - Name any new dependency and why Angular cannot cover it.
+  tasks:
+    - The last task runs npm run check, npm run test:ci and npm run build, and all three must pass.

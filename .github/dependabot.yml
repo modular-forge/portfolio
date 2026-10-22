@@ -1,22 +1,22 @@
 version: 2
 updates:
-  # Acciones y la referencia a ci-web (fijadas por SHA con su etiqueta en un comentario).
+  # Actions and the ci-web reference (pinned by SHA, with the tag in a comment).
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-    # Espera 7 días antes de proponer una versión recién publicada (las de seguridad no esperan).
+    # Wait 7 days before proposing a newly published version (security updates do not wait).
     cooldown:
       default-days: 7
     groups:
-      acciones:
+      actions:
         patterns: ['*']
-  # Dependencias de npm. Las versiones mayores se hacen a mano (ng update aplica migraciones).
+  # npm dependencies. Major versions are done by hand (ng update applies migrations).
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
-    # Espera 7 días antes de proponer una versión recién publicada (las de seguridad no esperan).
+    # Wait 7 days before proposing a newly published version (security updates do not wait).
     cooldown:
       default-days: 7
     open-pull-requests-limit: 5
@@ -26,5 +26,5 @@ updates:
     groups:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', '@schematics/angular']
-      resto:
+      others:
         patterns: ['*']

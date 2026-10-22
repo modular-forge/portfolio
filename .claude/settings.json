@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "disableClaudeAiConnectors": true,
+  "permissions": {
+    "allow": [
+      "Bash(npm run check)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:styles)",
+      "Bash(npm run format)",
+      "Bash(npm run format:check)",
+      "Bash(npm run deps:validate)",
+      "Bash(npm run knip)",
+      "Bash(npm run test:ci)",
+      "Bash(npm run build)",
+      "Bash(npx ng test *)",
+      "Bash(npx ng generate *)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git -C * push*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git reset --hard*)",
+      "Bash(git reset --soft*)",
+      "Bash(git clean -f*)",
+      "Bash(git tag*)",
+      "Bash(git stash drop*)",
+      "Bash(git stash clear*)",
+      "Bash(git branch -D*)",
+      "Bash(git filter-branch*)",
+      "Bash(git filter-repo*)",
+      "Bash(git update-ref*)",
+      "Bash(gh pr merge*)",
+      "Bash(gh repo delete*)",
+      "Bash(gh release*)",
+      "Bash(npm publish*)",
+      "Bash(npm audit fix*)",
+      "Bash(npm install-scripts approve*)",
+      "Bash(rm -rf*)",
+      "Bash(rm -fr*)",
+      "Bash(rimraf*)",
+      "Bash(npx rimraf*)",
+      "PowerShell(git push*)",
+      "PowerShell(git -C * push*)",
+      "PowerShell(git merge*)",
+      "PowerShell(git rebase*)",
+      "PowerShell(git reset --hard*)",
+      "PowerShell(git reset --soft*)",
+      "PowerShell(git clean -f*)",
+      "PowerShell(git tag*)",
+      "PowerShell(git stash drop*)",
+      "PowerShell(git stash clear*)",
+      "PowerShell(git branch -D*)",
+      "PowerShell(git filter-branch*)",
+      "PowerShell(git filter-repo*)",
+      "PowerShell(git update-ref*)",
+      "PowerShell(gh pr merge*)",
+      "PowerShell(gh repo delete*)",
+      "PowerShell(gh release*)",
+      "PowerShell(npm publish*)",
+      "PowerShell(npm audit fix*)",
+      "PowerShell(npm install-scripts approve*)",
+      "PowerShell(Remove-Item *)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.npmrc)",
+      "Read(~/.git-credentials)",
+      "Read(~/.config/gh/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint.mjs\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  }
+}

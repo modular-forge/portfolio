@@ -1,6 +1,9 @@
 {
-  // @angular-eslint/builder lo usa "ng lint" (angular.json) y lo instala el paquete angular-eslint.
-  // Su instalador lo quita a propósito de package.json cuando se usa npm, así que no se declara
-  // aparte: las migraciones de angular-eslint lo volverían a quitar.
+  // @angular-eslint/builder is used by "ng lint" (angular.json) and installed by the angular-eslint
+  // package. Its installer removes it from package.json on purpose when npm is used, so it is not
+  // declared separately: angular-eslint migrations would remove it again.
   "ignoreDependencies": ["@angular-eslint/builder"],
+  // Claude Code runs the hook (.claude/hooks/lint.mjs); nothing imports it. knip also scans dot
+  // folders and would report it as an unused file.
+  "ignoreFiles": [".claude/hooks/*.mjs"],
 }
