@@ -1,0 +1,8 @@
+# Scans what is about to be committed for secrets (gitleaks). Any finding cancels the commit.
+# Values are hidden in the output (--redact). Skip on purpose: git commit --no-verify
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed or not on PATH; commit cancelled." >&2
+  echo "Install it (https://github.com/gitleaks/gitleaks) or, on purpose, git commit --no-verify" >&2
+  exit 1
+fi
+gitleaks git --pre-commit --staged --redact -v

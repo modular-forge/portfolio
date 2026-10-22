@@ -1,1 +1,6 @@
 package-lock.json
+
+# Claude Code and OpenSpec: files their own tools write
+.claude/
+.mcp.json
+openspec/
