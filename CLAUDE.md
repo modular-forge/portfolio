@@ -14,8 +14,9 @@ Published at https://modular-forge.dev.
 - Talk to the user in Spanish. Everything written to the repository is in English: code,
   identifiers, comments, docs, `.claude/` files, OpenSpec proposals and specs, and commit messages
   (Conventional Commits, same style as `git log`).
-- Language of the text shown to visitors: **pending decision** (Spanish or English). Ask before
-  writing visible copy.
+- Text shown to visitors is in Spanish and English, with a language switcher: Angular i18n, one
+  prerendered build per language (for example `/es/` and `/en/`). Never hard-code visible copy in
+  one language only.
 - Never push, merge, rebase, tag or rewrite history: the user does that. Commit only when asked.
 - **Public repository:** everything committed is public. No secrets, tokens, personal data,
   internal hostnames or IPs, personal absolute paths or details of the home server in code, docs
@@ -74,9 +75,43 @@ thresholds or skip tests without asking.
 
 ## Workflow
 
-- New features, behaviour changes and multi-file refactors go through OpenSpec:
-  `/opsx:explore` (optional) → `/opsx:propose <change>` → the user reviews → `/opsx:apply` →
-  `/opsx:archive`. Small fixes can skip it.
+Forge flow: anvil tracks the work, OpenSpec holds the decisions.
+
+- **anvil** (`anvil` CLI, `anvil@anvil-hq` plugin) only tracks: priority, status, blockers and
+  the journal that carries one session into the next. The session starts with its briefing.
+- **OpenSpec** holds what the project decided: current requirements and business rules
+  (`openspec/specs/`), why a change is made (`proposal.md`), technical decisions (`design.md`)
+  and implementation tasks (`tasks.md`). A decision made in a session is written there; the
+  journal only mentions it.
+
+Every request goes through these steps:
+
+1. **Focus.** Tie the request to an anvil item. If it is not trivial and has no item, say it is
+   off-priority and offer to note it in the inbox and go back to the focus, unless the user
+   decides to switch.
+2. **Explore** read-only and resolve doubts before changing anything (`/opsx:explore` if needed).
+3. **Classify** with the resumption test: could the work be picked up again with only the
+   request and the `git diff`?
+
+   | Level   | Examples                                                 | Process                                                                                                                                             |
+   | ------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Trivial | Typo, style, dependency bump with no change of behaviour | Implement directly, no OpenSpec change. If it alters what the visitor sees, update the spec                                                         |
+   | Normal  | A bounded feature                                        | `/opsx:propose` (proposal, delta, tasks; `design.md` only for a technical decision) → the user reviews → `/opsx:apply` test first → `/opsx:archive` |
+   | Risky   | Exposed to the Internet, authentication, data            | Normal plus `/opsx:explore`, `design.md`, a full review, `/opsx:verify` and the `code-reviewer` agent                                               |
+
+4. **Track.** The item goes to doing and names the OpenSpec change. One item per change: its
+   steps are the phases only, the tasks stay in `tasks.md`.
+5. **Implement** task by task. Check each step when it is completed; if something blocks, set
+   the item to blocked with the reason.
+6. **Close with proof:** the definition-of-done commands, the PR and the change archived. The
+   item goes to done only when the user confirms the merge.
+7. **End of session:** the user runs `/anvil:wrap-up`, which checks the items against what was
+   done and writes the journal note.
+
+Without asking you may move an item to doing or blocked and check steps. Always ask before
+creating an item, closing one (done or cancelled) or skipping a step. Change items only with the
+`anvil` CLI, never by editing its files.
+
 - Work on a branch, never on `main`. One logical change per commit.
 - Before the final summary, read your own diff (`git diff`) for debug code, TODOs and unrelated
   changes.
@@ -121,7 +156,7 @@ public/                            # static assets copied as they are (project i
   product gets a web version of the app at another address, add `webApp`.
 - List and detail pages. `/projects/<slug>` is prerendered with `getPrerenderParams` and
   `fallback: PrerenderFallback.Client` (an unknown slug shows a client-side "not found"). The URL
-  segment will be revisited together with the visible-language decision.
+  segment will be revisited when i18n is set up (a language prefix changes the URLs).
 - `projects.data.spec.ts` checks: unique and valid slugs, `date` as `YYYY-MM`, and at least one of
   `web`, `android` or `ios` in every `published` project.
 - Google Play and App Store badges: the official artwork, following their usage guidelines.
@@ -145,7 +180,7 @@ public/                            # static assets copied as they are (project i
 - The installed Vite has advisories that affect only the dev server (fixed when Angular ships
   Vite ≥ 8.3.3): keep `npm start` on localhost.
 
-### Session logs
+### Session notes
 
-- Not kept in this public repository: do not create `docs/context/`. Decisions are recorded in
-  OpenSpec (`openspec/changes/archive/`).
+- Not kept in this public repository: the journal between sessions lives in anvil, so do not
+  create `docs/context/`. Decisions are recorded in OpenSpec (`openspec/changes/archive/`).
