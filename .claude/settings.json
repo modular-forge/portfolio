@@ -13,7 +13,29 @@
       "Bash(npm run test:ci)",
       "Bash(npm run build)",
       "Bash(npx ng test *)",
-      "Bash(npx ng generate *)"
+      "Bash(npx ng generate *)",
+      "Bash(anvil briefing)",
+      "Bash(anvil briefing *)",
+      "Bash(anvil item list *)",
+      "Bash(anvil item show *)",
+      "Bash(anvil search *)",
+      "Bash(anvil journal list *)",
+      "Bash(anvil audit)",
+      "Bash(anvil audit *)",
+      "Bash(anvil item status * doing)",
+      "Bash(anvil item status * blocked *)",
+      "Bash(anvil step check *)",
+      "PowerShell(anvil briefing)",
+      "PowerShell(anvil briefing *)",
+      "PowerShell(anvil item list *)",
+      "PowerShell(anvil item show *)",
+      "PowerShell(anvil search *)",
+      "PowerShell(anvil journal list *)",
+      "PowerShell(anvil audit)",
+      "PowerShell(anvil audit *)",
+      "PowerShell(anvil item status * doing)",
+      "PowerShell(anvil item status * blocked *)",
+      "PowerShell(anvil step check *)"
     ],
     "deny": [
       "Bash(git push*)",
@@ -83,7 +105,16 @@
       }
     ]
   },
+  "extraKnownMarketplaces": {
+    "anvil-hq": {
+      "source": {
+        "source": "github",
+        "repo": "modular-forge/anvil-hq"
+      }
+    }
+  },
   "enabledPlugins": {
+    "anvil@anvil-hq": true,
     "typescript-lsp@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,

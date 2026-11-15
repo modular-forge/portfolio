@@ -2,10 +2,10 @@
 name: docs
 description: >
   Documentation maintainer. Use for: README, CLAUDE.md, files under .claude/ (agents, rules,
-  skills), TSDoc on public services and data types, and session logs (session-context-log
-  skill).
+  skills) and TSDoc on public services and data types.
   Do NOT use for: production code (→ angular-dev), tests (→ testing), OpenSpec proposals and
-  specs (the OpenSpec commands handle those).
+  specs (the OpenSpec commands handle those), anvil items and journal notes (the anvil CLI and
+  /anvil:wrap-up handle those).
 model: haiku
 color: yellow
 tools:
