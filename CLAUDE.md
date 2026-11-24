@@ -13,7 +13,7 @@ Published at https://modular-forge.dev.
 
 - Talk to the user in Spanish. Everything written to the repository is in English: code,
   identifiers, comments, docs, `.claude/` files, OpenSpec proposals and specs, and commit messages
-  (Conventional Commits, same style as `git log`).
+  (Conventional Commits as described in "Commits and review").
 - Text shown to visitors is in Spanish and English, with a language switcher: Angular i18n, one
   prerendered build per language (for example `/es/` and `/en/`). Never hard-code visible copy in
   one language only.
