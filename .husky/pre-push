@@ -1,3 +1,9 @@
-# Quick checks before every push: the CI "verify" job without build and tests.
-# If any of them fails, the push is cancelled. Skip on purpose: git push --no-verify
+# Blocks pushes to main (changes reach main only through a merged pull request), then runs the
+# project checks. Any failure cancels the push. Skip on purpose: git push --no-verify
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "pre-push: pushing to main is blocked; open a pull request and merge it." >&2
+    exit 1
+  fi
+done
 npm run check
