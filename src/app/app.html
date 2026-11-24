@@ -49,6 +49,10 @@
       'Segoe UI Emoji',
       'Segoe UI Symbol';
     box-sizing: border-box;
+    /* Placeholder until the home page (PF-4): keep it light so its fixed colours stay readable
+       when the global dark theme is active. */
+    color-scheme: light;
+    background: #fff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     display: block;
@@ -176,6 +180,10 @@
     align-items: center;
     gap: 0.73rem;
     margin-top: 1.5rem;
+  }
+
+  .social-links a {
+    background: none;
   }
 
   .social-links path {

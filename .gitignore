@@ -46,3 +46,6 @@ Thumbs.db
 # Claude Code: personal settings and instructions
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Impeccable design hook: local cache
+.impeccable/hook.cache.json
