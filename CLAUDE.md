@@ -13,16 +13,20 @@ Published at https://modular-forge.dev.
 
 - Talk to the user in Spanish. Everything written to the repository is in English: code,
   identifiers, comments, docs, `.claude/` files, OpenSpec proposals and specs, and commit messages
-  (Conventional Commits, same style as `git log`).
+  (Conventional Commits as described in "Commits and review").
 - Text shown to visitors is in Spanish and English, with a language switcher: Angular i18n, one
   prerendered build per language (for example `/es/` and `/en/`). Never hard-code visible copy in
   one language only.
-- Never push, merge, rebase, tag or rewrite history: the user does that. Commit only when asked.
+- Commit, push and merge only as "Commits and review" describes, each after the user's OK. Never
+  force-push, push to `main`, rebase, tag or rewrite history.
 - **Public repository:** everything committed is public. No secrets, tokens, personal data,
   internal hostnames or IPs, personal absolute paths or details of the home server in code, docs
   or commit messages.
 - Never invent APIs, versions or options. Check the installed version (`package.json`) and the
   docs (Angular CLI MCP, `angular-developer` skill) first.
+- Browser support: this project's Baseline target is Baseline Widely available. Before writing
+  HTML, CSS or client-side JS, look the pattern up with the `modern-web-guidance` skill and apply
+  its fallbacks for anything outside the target.
 - Ask before: adding or upgrading a dependency, changing CI or deployment files, deleting files
   you did not create, or touching anything outside this repository.
 
@@ -101,8 +105,8 @@ Every request goes through these steps:
 
 4. **Track.** The item goes to doing and names the OpenSpec change. One item per change: its
    steps are the phases only, the tasks stay in `tasks.md`.
-5. **Implement** task by task. Check each step when it is completed; if something blocks, set
-   the item to blocked with the reason.
+5. **Implement** task by task, each one through the review loop in "Commits and review". Check
+   each step when it is completed; if something blocks, set the item to blocked with the reason.
 6. **Close with proof:** the definition-of-done commands, the PR and the change archived. The
    item goes to done only when the user confirms the merge.
 7. **End of session:** the user runs `/anvil:wrap-up`, which checks the items against what was
@@ -112,9 +116,59 @@ Without asking you may move an item to doing or blocked and check steps. Always 
 creating an item, closing one (done or cancelled) or skipping a step. Change items only with the
 `anvil` CLI, never by editing its files.
 
-- Work on a branch, never on `main`. One logical change per commit.
-- Before the final summary, read your own diff (`git diff`) for debug code, TODOs and unrelated
-  changes.
+## Commits and review
+
+Work on a branch, never on `main`. One logical change per commit, usually one OpenSpec task.
+
+Review loop, for every task:
+
+1. Finish the task and run the definition of done.
+2. Read your own diff for debug code, TODOs and unrelated changes, then run the `code-reviewer`
+   agent and fix what it finds.
+3. Stop. Summarise what changed, the real check results and what the user should look at. The
+   user reviews locally (`git diff`).
+4. Commit only after the user's OK. If they ask for changes, apply them and go back to step 1.
+
+Commit message: Conventional Commits with the type's emoji in front, imperative subject under
+72 characters (aim for 50) with no final period, a body that explains why when it is not obvious,
+and the anvil item as a trailer:
+
+```
+✨ feat(contact): validate email after first blur
+
+Errors shown while typing felt hostile; they now appear once the field loses focus.
+
+Refs: <ITEM-ID>
+```
+
+| Type       | Emoji | For                         |
+| ---------- | ----- | --------------------------- |
+| `feat`     | ✨    | New feature                 |
+| `fix`      | 🐛    | Bug fix                     |
+| `docs`     | 📝    | Documentation only          |
+| `style`    | 🎨    | Formatting, no logic change |
+| `refactor` | ♻️    | Restructure, same behaviour |
+| `perf`     | ⚡️    | Performance                 |
+| `test`     | ✅    | Tests                       |
+| `build`    | 📦️    | Build system, dependencies  |
+| `ci`       | 👷    | CI                          |
+| `chore`    | 🔧    | Maintenance, configuration  |
+| `revert`   | ⏪️    | Revert a commit             |
+
+A breaking change adds `!` after the type or scope and a `BREAKING CHANGE:` footer. Use the
+Unicode emoji, never `:shortcodes:`.
+
+Pull request and merge, once the user says the cycle is fine:
+
+1. Check every commit subject on the branch against the format above
+   (`git log main..HEAD --format=%s`) and fix any before going on.
+2. `git push -u origin HEAD` (the `pre-push` hook blocks `main` and runs `npm run check`).
+3. `gh pr create`: title in the commit format (it becomes the merge commit message); body with
+   the anvil item, the OpenSpec change, a short summary and the definition-of-done results.
+4. Ask to merge with `gh pr merge <number> --merge`. The permission prompt is the user's final
+   approval; never use `--admin`, `--squash` or `--rebase`.
+5. After the merge: `git switch main && git pull`, and propose closing the item with the PR as
+   evidence.
 
 ## Project structure
 
