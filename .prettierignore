@@ -4,3 +4,6 @@ package-lock.json
 .claude/
 .mcp.json
 openspec/
+
+# Impeccable design hook: local cache (its shared config.json is committed)
+.impeccable/hook.cache.json
