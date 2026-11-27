@@ -5,9 +5,9 @@
 - [x] 1.1 Run `ng add @angular/localize@22.2.4`; review what it changed (`package.json`, polyfills
       for build and test, tsconfig types) and keep only what the docs require; verify
       `npm run test:ci` still passes
-- [ ] 1.2 Add the project `i18n` block (`sourceLocale: "en"`, `es` →
+- [x] 1.2 Add the project `i18n` block (`sourceLocale: "en"`, `es` →
       `src/locale/messages.es.xlf`), `localize: true`, `i18nMissingTranslation: "error"` and
-      `i18nDuplicateTranslation: "error"` for production, plus the `development-es` build and serve
+      `i18nDuplicateTranslation: "error"` for production, plus the `es` build and serve
       configurations and a `start:es` script, as in `design.md` Decision 2; verify `npm run build`
       writes `dist/portfolio/browser/en/index.html` and `dist/portfolio/browser/es/index.html` with
       `<base href="/en/">` and `<base href="/es/">`, and `npm run start:es` serves Spanish locally
@@ -16,7 +16,7 @@
       URLs as in `design.md` Decision 9; verify in the browser's network panel, serving
       `dist/portfolio/browser` locally, that every font loads from the same origin under both
       prefixes, and record the chosen form in `design.md`
-- [ ] 1.4 Confirm the prerendered `index.html` of each locale has the right `<html lang>`; note in
+- [x] 1.4 Confirm the prerendered `index.html` of each locale has the right `<html lang>`; note in
       `design.md` Decision 7 whether the build sets it or the metadata service must
 
 ## 2. Translation workflow

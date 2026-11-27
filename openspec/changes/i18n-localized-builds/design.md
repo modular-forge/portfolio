@@ -48,9 +48,12 @@ a page load when switching language, which is cheap for static pages.
   always contains both locales and never ships an untranslated text. `i18nDuplicateTranslation:
   "error"` too, to catch a corrupted merge.
 - Development: the dev server serves one locale at a time. The default `development` configuration
-  serves English. A `development-es` build configuration (`localize: ["es"]`) and its serve
-  configuration back a `start:es` script. The exact URL the dev server uses for a localized build is
-  checked in the first task and written into `CLAUDE.md`.
+  serves English. An `es` build configuration holds only `localize: ["es"]`, and the `es` serve
+  configuration combines it with development (`portfolio:build:development,es`), so the development
+  options are not duplicated. `es` is only meant to be combined that way; on its own it would replace
+  `production` and skip its checks. `npm run start:es` serves Spanish at the dev server root
+  (`http://localhost:4200/`, `<html lang="es">`, `<base href="/">`), not under `/es/`: the prefix
+  only exists in the production build.
 - `ng add @angular/localize@22.2.4` installs the package and adds its polyfill and types to the
   build, test and TypeScript configuration; the task checks what it changed instead of assuming it.
 
@@ -103,8 +106,9 @@ per page, so it works without JavaScript.
 
 A root service sets, on every navigation: the `<title>` and meta description (translated with
 `$localize`), and the `<link rel="alternate">` set (`en`, `es`, `x-default` → origin + `/`). It
-replaces existing alternates instead of appending. `<html lang>` is set by the localized build; the
-task confirms it in the prerendered output and only sets it from the service if the build does not.
+replaces existing alternates instead of appending. `<html lang>` is not the service's job: the
+localized build already writes `<html lang="en" dir="ltr">` and `<html lang="es" dir="ltr">` into
+each locale's `index.html` (checked in the prerendered output).
 
 ### 8. Hosting requirements (documented, configured outside the repository)
 
