@@ -45,8 +45,11 @@ the build references them may change.
 
 ## New dependencies
 
-- `@angular/localize` 22.2.4 (runtime, same version as `@angular/core`): Angular's own i18n package.
+- `@angular/localize` 22.2.4 (dev, same version as `@angular/core`): Angular's own i18n package.
   It is how Angular provides i18n; the framework packages already installed do not include it.
+  Translations are inlined at build time, so `ng add` places it in `devDependencies`. It uses the
+  same caret range as `@angular/compiler` and `@angular/compiler-cli`, whose exact version it
+  requires, so it moves with them on every Angular update.
 - `ng-extract-i18n-merge` 3.5.0, exact (dev): `ng extract-i18n` only writes the source-language file
   and never updates translation files. This builder merges new, changed and removed units into
   `messages.es.xlf` and keeps a stable order for clean diffs. Angular has no equivalent. Published

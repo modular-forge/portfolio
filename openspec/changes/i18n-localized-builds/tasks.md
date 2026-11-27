@@ -2,7 +2,7 @@
 
 ## 1. Localized build
 
-- [ ] 1.1 Run `ng add @angular/localize@22.2.4`; review what it changed (`package.json`, polyfills
+- [x] 1.1 Run `ng add @angular/localize@22.2.4`; review what it changed (`package.json`, polyfills
       for build and test, tsconfig types) and keep only what the docs require; verify
       `npm run test:ci` still passes
 - [ ] 1.2 Add the project `i18n` block (`sourceLocale: "en"`, `es` →
