@@ -11,6 +11,15 @@
           <context context-type="sourcefile">src/app/i18n/page-metadata.ts</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7626180032351093562" datatype="html">
+        <source>Language</source>
+        <target state="translated">Idioma</target>
+        <note priority="1" from="description">Accessible name of the language switcher region</note>
+        <note priority="1" from="meaning">language switcher</note>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/i18n/language-switcher/language-switcher.html</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="9201512850469830354" datatype="html">
         <source>modular-forge · Portfolio</source>
         <target state="translated">modular-forge · Portfolio</target>

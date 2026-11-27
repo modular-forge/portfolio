@@ -44,12 +44,12 @@
 
 ## 4. Language switcher
 
-- [ ] 4.1 Write the spec first, then add the switcher component and a minimal `<header>` in
+- [x] 4.1 Write the spec first, then add the switcher component and a minimal `<header>` in
       `app.html` (`design.md` Decision 6), styled only with existing tokens; verify the spec (link
       target, `lang`, `hreflang`, text per locale) and, in the browser at 375 px and 1280 px, that
       `/en/` links to `/es/` and back, it is reachable by keyboard with visible focus, and no cookie
       or storage entry is written
-- [ ] 4.2 Extract and translate the new texts into `messages.es.xlf`; verify `npm run extract-i18n`
+- [x] 4.2 Extract and translate the new texts into `messages.es.xlf`; verify `npm run extract-i18n`
       leaves no unit without a target and `npm run build` passes
 
 ## 5. Documentation

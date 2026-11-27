@@ -139,6 +139,11 @@ names of languages are deliberately not translated: each one is shown in its own
 the existing tokens only; layout of the real header is PF-4's job. Prerendering computes the `href`
 per page, so it works without JavaScript.
 
+The current path starts from `Location.path()` and then follows `NavigationEnd`. Not from
+`router.url`: in the browser the first navigation is non-blocking and ends after hydration, so
+`router.url` is still `/` at first, and a deep page would link to the other language's home for a
+moment. A test creates the switcher before any navigation to cover this.
+
 ### 7. Page metadata service
 
 A root service sets, on every navigation: the `<title>` and meta description (translated with
