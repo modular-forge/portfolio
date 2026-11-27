@@ -114,6 +114,19 @@
           "options": {
             "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
+        },
+        "extract-i18n": {
+          "builder": "ng-extract-i18n-merge:ng-extract-i18n-merge",
+          "options": {
+            "buildTarget": "portfolio:build",
+            "format": "xlf",
+            "outputPath": "src/locale",
+            "targetFiles": ["messages.es.xlf"],
+            "newTranslationTargetsBlank": "omit",
+            "fuzzyMatch": false,
+            "includeContext": true,
+            "includeContextLineNumber": false
+          }
         }
       }
     }

@@ -21,13 +21,15 @@
 
 ## 2. Translation workflow
 
-- [ ] 2.1 Install `ng-extract-i18n-merge` 3.5.0 (exact, dev) with its `ng add` schematic; configure
+- [x] 2.1 Install `ng-extract-i18n-merge` 3.5.0 (exact, dev) with its `ng add` schematic; configure
       it from its installed schema for XLIFF 1.2, output `src/locale/`, target `es`; add an
       `extract-i18n` script; verify `npm run extract-i18n` writes `messages.xlf` and
       `messages.es.xlf` and running it twice produces no diff
-- [ ] 2.2 Verify the failure path: add a temporary `i18n` text without translating it and check that
+- [x] 2.2 Verify the failure path: add a temporary `i18n` text without translating it and check that
       `npm run build` fails naming it, then change its English text after translating and check it
-      fails again; remove the temporary text and record the result in the task summary
+      fails again; remove the temporary text and record the result in the task summary. Angular
+      did not fail on a unit with no `<target>`, so `scripts/check-translations.mjs` was added
+      (`design.md` Decision 4)
 
 ## 3. Locale helper and metadata
 

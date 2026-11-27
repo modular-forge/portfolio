@@ -25,7 +25,8 @@ prerendered URL rather than text swapped in the browser.
   hash IDs, meaning and description given for context, XLIFF 1.2 files under `src/locale/`, and the
   build fails on a missing translation.
 - Extraction and merge with `ng-extract-i18n-merge`, so new or changed texts land in the Spanish file
-  marked for translation and removed texts disappear from it.
+  marked for translation and removed texts disappear from it. A small script checks before every
+  build that no unit is left untranslated, because Angular silently falls back to English for them.
 - Convention for content data: localized fields in typed data files are objects with one value per
   locale (`{ en, es }`), recorded in `design.md` and `CLAUDE.md` for the projects section (PF-7).
 - Self-hosted fonts keep loading from the site's origin under each locale prefix.

@@ -77,9 +77,46 @@ a page load when switching language, which is cheap for static pages.
 `ng extract-i18n` only rewrites the source file. `ng-extract-i18n-merge` 3.5.0 (exact, dev) replaces
 the `extract-i18n` target with a builder that extracts and merges into `messages.es.xlf`. New units
 arrive marked for translation, removed units are deleted, existing translations are kept and the
-order is stable. It is installed with its own `ng add` schematic. Its builder options are taken from
-the installed package's schema at that point, not assumed here; the configuration must keep XLIFF
-1.2, `src/locale/` and the `es` target file. An `extract-i18n` npm script runs it.
+order is stable. It is installed with its own `ng add` schematic, which inferred `format: "xlf"`,
+`outputPath: "src/locale"` and `targetFiles: ["messages.es.xlf"]`; the version is then pinned
+exactly. An `extract-i18n` npm script runs it.
+
+Two defaults of the installed schema would let an untranslated text ship, against the spec, so they
+are overridden:
+
+- `newTranslationTargetsBlank: "omit"` (default `false` copies the English source into the new
+  `<target>`, which the build accepts as a translation).
+- `fuzzyMatch: false` (default `true` carries an old translation over to a changed English text by
+  similarity). A changed text must be translated again.
+
+That is not enough on its own. Angular's XLIFF 1.2 loader treats a unit with no `<target>` as a
+warning and falls back to its English `<source>` (checked in `@angular/localize`'s parser and in a
+build: `/es/` showed the English text and the build passed, with no warning printed).
+`i18nMissingTranslation: "error"` only fires when the unit is absent from the file, which is the
+case before extraction but not after the merge adds it.
+
+So `scripts/check-translations.mjs` (Node, no dependencies) closes the gap. It fails when a unit in a
+`src/locale/messages.*.xlf` translation file has no `<target>`, an empty one, or an XLIFF 1.2 state
+other than `translated`, `signed-off` or `final` (so `new` and every `needs-*` state fail), and names
+each source text. It also fails when the folder is missing or holds no translation file. It runs as
+`prebuild` (so `npm run build` fails before building), in `npm run check` (`i18n:check`, also run by
+the pre-push hook) and in CI: the pinned ci-web workflow already runs `npm run i18n:check
+--if-present` and builds with `npm run build`. Checked end to end with a temporary text:
+
+| Situation                                | Fails at                                     |
+| ---------------------------------------- | -------------------------------------------- |
+| New text, not extracted                  | Angular: `No translation found for "<id>"`   |
+| New text, extracted, not translated      | checker: `no <target> for "<text>"`          |
+| Translated                               | passes; `/es/` shows the Spanish             |
+| English text changed, not extracted      | Angular: `No translation found` (new hash)   |
+| English text changed, extracted          | checker; the old translation is removed      |
+| A `<target>` left in `state="new"`       | checker: `state="new"`                       |
+
+Rejected: dropping the merge tool and copying units by hand, which makes Angular fail on its own but
+loses the automatic merge the user asked for.
+
+`includeContext: true` with `includeContextLineNumber: false` adds each unit's source file to the
+XLIFF files without churn when lines move. Meaning and description are included by default.
 
 ### 5. Locale helper: one source for supported locales and URLs
 

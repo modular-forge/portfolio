@@ -15,8 +15,11 @@
     "deps:validate": "depcruise src",
     "knip": "knip",
     "prepare": "husky",
-    "check": "npm run format:check && npm run lint && npm run lint:styles && npm run deps:validate && npm run knip",
-    "test:ci": "ng test --watch=false --coverage"
+    "check": "npm run format:check && npm run lint && npm run lint:styles && npm run deps:validate && npm run knip && npm run i18n:check",
+    "test:ci": "ng test --watch=false --coverage",
+    "extract-i18n": "ng extract-i18n",
+    "prebuild": "npm run i18n:check",
+    "i18n:check": "node scripts/check-translations.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
@@ -45,6 +48,7 @@
     "husky": "^9.1.7",
     "jsdom": "^30.0.0",
     "knip": "^6.41.0",
+    "ng-extract-i18n-merge": "3.5.0",
     "prettier": "^3.8.1",
     "stylelint": "^17.16.0",
     "stylelint-config-standard-scss": "^17.0.0",
