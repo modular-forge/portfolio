@@ -36,7 +36,7 @@
 - [x] 3.1 Write the specs first, then add `src/app/i18n/` with the supported locales, their own
       names, the site origin and the pure URL function (`design.md` Decision 5); verify the specs
       cover both locales, the root path, nested paths and query-free output
-- [ ] 3.2 Write the spec first, then add the page metadata service (`design.md` Decision 7): title
+- [x] 3.2 Write the spec first, then add the page metadata service (`design.md` Decision 7): title
       and description with `$localize` (meaning and description), alternates `en`, `es`,
       `x-default` as absolute URLs, replaced on each navigation; verify the spec and, after
       `npm run build`, that `dist/portfolio/browser/es/index.html` has the Spanish title,

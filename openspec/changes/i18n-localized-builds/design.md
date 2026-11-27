@@ -142,10 +142,24 @@ per page, so it works without JavaScript.
 ### 7. Page metadata service
 
 A root service sets, on every navigation: the `<title>` and meta description (translated with
-`$localize`), and the `<link rel="alternate">` set (`en`, `es`, `x-default` → origin + `/`). It
-replaces existing alternates instead of appending. `<html lang>` is not the service's job: the
-localized build already writes `<html lang="en" dir="ltr">` and `<html lang="es" dir="ltr">` into
-each locale's `index.html` (checked in the prerendered output).
+`$localize`), the `<link rel="alternate">` set (`en`, `es`, `x-default` → origin + `/`) and a
+self-referencing `<link rel="canonical">` to the page in the build's locale (from `LOCALE_ID`), so
+each language version is indexed as its own page. It replaces existing links instead of appending.
+`<html lang>` is not the service's job: the localized build already writes `<html lang="en"
+dir="ltr">` and `<html lang="es" dir="ltr">` into each locale's `index.html` (checked in the
+prerendered output).
+
+The service starts from `provideAppInitializer` and also runs while prerendering, so the metadata is
+in the static HTML. On the client, the first navigation replaces the prerendered alternates with
+identical ones (they live in `<head>`, outside the hydrated root), so nothing is duplicated.
+
+Constraints for later changes, not needed with today's single page:
+
+- The title is one site-wide text set on every navigation. When pages get their own titles (the
+  projects detail in PF-7), the title must move to a `TitleStrategy` that falls back to this text,
+  or the two would overwrite each other.
+- Unknown URLs (client fallback) also get the canonical and alternates; the not-found page should
+  drop them and add `noindex`.
 
 ### 8. Hosting requirements (documented, configured outside the repository)
 

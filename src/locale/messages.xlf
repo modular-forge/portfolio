@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
-    <body/>
+    <body>
+      <trans-unit id="4967624488236575247" datatype="html">
+        <source>Portfolio of modular-forge: the products and apps I have built for the web, Android and iOS, and how to get in touch.</source>
+        <note priority="1" from="description">Meta description of the site for search engines</note>
+        <note priority="1" from="meaning">page description</note>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/i18n/page-metadata.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9201512850469830354" datatype="html">
+        <source>modular-forge · Portfolio</source>
+        <note priority="1" from="description">Title of the site shown in the browser tab</note>
+        <note priority="1" from="meaning">page title</note>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/i18n/page-metadata.ts</context>
+        </context-group>
+      </trans-unit>
+    </body>
   </file>
 </xliff>

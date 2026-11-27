@@ -68,8 +68,8 @@ and declare the target language. Switching SHALL NOT store any preference on the
 ### Requirement: Language metadata for search engines
 
 Every page SHALL declare its language on the root element, have a title and meta description in its
-language, and list its alternates: the page in each language with `hreflang` `en` and `es`, plus the
-root as `x-default`, all as absolute URLs.
+language, list its alternates (the page in each language with `hreflang` `en` and `es`, plus the
+root as `x-default`) and name itself as canonical, all as absolute URLs.
 
 #### Scenario: Metadata of a Spanish page
 
@@ -77,6 +77,13 @@ root as `x-default`, all as absolute URLs.
 - **THEN** the root element has `lang="es"`, the title and description are in Spanish, and the head
   links `/en/<path>` as `en`, `/es/<path>` as `es` and `/` as `x-default` with the site's absolute
   origin
+
+#### Scenario: Each language version is its own canonical page
+
+- **WHEN** a crawler reads `/en/<path>` or `/es/<path>`
+- **THEN** the head has exactly one canonical link, pointing to that same page in that same language
+  (absolute URL, without query string or fragment), so the two versions are indexed separately and
+  not as duplicates
 
 ### Requirement: Every visible text exists in both languages
 
