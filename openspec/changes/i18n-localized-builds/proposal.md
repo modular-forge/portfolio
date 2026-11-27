@@ -40,8 +40,10 @@ prerendered URL rather than text swapped in the browser.
 
 ### Modified Capabilities
 
-None. `visual-theme` keeps its requirements: fonts still load from the site's own origin; only how
-the build references them may change.
+- `visual-theme`: the "Self-hosted fonts" requirement's licence scenario. Fonts still load from the
+  site's own origin, but the build now serves them with a content hash from each language's
+  `media/` folder, so the licences can no longer sit next to the served files; they stay in
+  `fonts/<family>/` and the fonts README maps each served file to its licence.
 
 ## New dependencies
 

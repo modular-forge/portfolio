@@ -124,11 +124,30 @@ Its configuration is kept privately with the server, not in this public reposito
 
 ### 9. Fonts and public assets under a locale prefix
 
-With `localize`, `public/` is copied into each locale folder, so `/fonts/…` (root-absolute) would
-point at the site root, where no locale build lives. The first task builds and inspects the output.
-If the root-absolute URLs break, the `@font-face` URLs become relative ones resolved per locale, and
-the task records which form works and why. Whatever the form, fonts keep loading from the site's
-origin (`visual-theme` is unchanged). The same check covers `favicon.ico`.
+With `localize`, `public/` is copied into each locale folder, so `/fonts/…` (root-absolute) points
+at the site root, where no locale build lives: checked in the built CSS, the fonts would 404.
+
+Chosen form: `url('../public/fonts/…')`, relative to `src/styles.scss`. The build resolves it,
+emits each font with a content hash into every locale's `media/` folder and rewrites the URL to
+`./media/<name>-<hash>.woff2`, which the browser resolves against the stylesheet (`/en/…`,
+`/es/…`). The hash also makes the fonts safe to cache long. The `public/` asset entry ignores
+`fonts/**/*.woff2` so the files are not shipped twice; the fonts README and licences are still
+copied.
+
+Rejected: `url('fonts/…')` without the leading slash. The build resolves relative URLs at compile
+time, finds nothing under `src/fonts/` and fails (`Could not resolve`). Moving the files out of
+`public/` would contradict the `design-tokens` decision for no gain.
+
+Checked in a browser against `dist/portfolio/browser` served locally: the four faces load with
+`200` from `/en/media/` and `/es/media/`, every request stays on the same origin, and
+`favicon.ico` (a relative `href`) resolves to `/en/favicon.ico` and `/es/favicon.ico`. The dev
+server (`npm start`) serves them from `/media/` with `200` too.
+
+Licences: the served files no longer sit next to their `OFL.txt`, so the `visual-theme` licence
+scenario changes (delta in this change). The licences stay published in each locale's
+`fonts/<family>/`, and `public/fonts/README.md`, also published, maps each served file to its family
+and licence. Rejected: dropping the `ignore` to keep a second, never-requested copy of every font
+next to its licence.
 
 ### 10. Localized content in data files
 

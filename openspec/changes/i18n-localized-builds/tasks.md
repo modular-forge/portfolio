@@ -11,7 +11,7 @@
       configurations and a `start:es` script, as in `design.md` Decision 2; verify `npm run build`
       writes `dist/portfolio/browser/en/index.html` and `dist/portfolio/browser/es/index.html` with
       `<base href="/en/">` and `<base href="/es/">`, and `npm run start:es` serves Spanish locally
-- [ ] 1.3 Inspect the built output for fonts and `favicon.ico` under each locale; if the
+- [x] 1.3 Inspect the built output for fonts and `favicon.ico` under each locale; if the
       root-absolute `/fonts/…` URLs do not resolve from `/en/` and `/es/`, change the `@font-face`
       URLs as in `design.md` Decision 9; verify in the browser's network panel, serving
       `dist/portfolio/browser` locally, that every font loads from the same origin under both
