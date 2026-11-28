@@ -15,7 +15,7 @@ concurrency:
 jobs:
   web:
     name: Web
-    uses: modular-forge/ci-web/.github/workflows/web.yml@e7c85b3272bbf9c2ac9b7290ff8be322f5d86446 # v1.0.0
+    uses: modular-forge/ci-web/.github/workflows/web.yml@f262a457b6c9821119f8616cb900efcc59344622 # feat/localized-builds (pre-v1.1.0, CW-2)
     permissions:
       contents: read # check out the code
       id-token: write # the deploy job joins Tailscale with workload identity federation
@@ -25,6 +25,7 @@ jobs:
     with:
       site: portfolio
       dist: dist/portfolio/browser
+      locales: en es
       url: https://modular-forge.dev
       ts-oauth-client-id: ${{ vars.TS_OAUTH_CLIENT_ID }}
       ts-audience: ${{ vars.TS_AUDIENCE }}
