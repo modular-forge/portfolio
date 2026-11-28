@@ -62,7 +62,7 @@
 
 ## 6. Final check
 
-- [ ] 6.1 Run `npm run check`, `npm run test:ci` and `npm run build`; all three must pass
+- [x] 6.1 Run `npm run check`, `npm run test:ci` and `npm run build`; all three must pass
 
 ## Workflow follow-up
 
