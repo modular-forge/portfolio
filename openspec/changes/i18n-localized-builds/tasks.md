@@ -54,7 +54,7 @@
 
 ## 5. Documentation
 
-- [ ] 5.1 Update `CLAUDE.md` (with the `docs` agent): i18n stack line, `start:es` and
+- [x] 5.1 Update `CLAUDE.md` (with the `docs` agent): i18n stack line, `start:es` and
       `extract-i18n` commands, how to add or change a text, the locale-prefixed URLs (resolving the
       "revisited when i18n is set up" note for `/projects/<slug>`), the `{ en, es }` convention for
       data files, and that `dist` now has one folder per locale; verify every command written there

@@ -14,9 +14,9 @@ Published at https://modular-forge.dev.
 - Talk to the user in Spanish. Everything written to the repository is in English: code,
   identifiers, comments, docs, `.claude/` files, OpenSpec proposals and specs, and commit messages
   (Conventional Commits as described in "Commits and review").
-- Text shown to visitors is in Spanish and English, with a language switcher: Angular i18n, one
-  prerendered build per language (for example `/es/` and `/en/`). Never hard-code visible copy in
-  one language only.
+- Text shown to visitors is in English and Spanish: Angular built-in i18n, one prerendered build
+  per locale under `/en/` and `/es/` (`en` is the source, `es` is translated). Never hard-code
+  visible copy in one language only. Working rules: `.claude/rules/i18n.md`.
 - Commit, push and merge only as "Commits and review" describes, each after the user's OK. Never
   force-push, push to `main`, rebase, tag or rewrite history.
 - **Public repository:** everything committed is public. No secrets, tokens, personal data,
@@ -32,22 +32,26 @@ Published at https://modular-forge.dev.
 
 ## Stack
 
-| Layer      | Technology                                                                                                                                                     |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework  | Angular 22.2 (standalone, signals, zoneless)                                                                                                                   |
-| Rendering  | Static prerender only: `outputMode: "static"`, `RenderMode.Prerender` for every route. `@angular/ssr` runs at build time; no server at runtime                 |
-| Styles     | SCSS; design tokens in `src/styles.scss`. The visual design comes from Claude Design                                                                           |
-| Unit tests | Vitest through `ng test` (`@angular/build:unit-test`), 80 % global coverage thresholds in `angular.json`                                                       |
-| Node / npm | Node 24 (`.nvmrc`), npm 11.19.1 (`packageManager`)                                                                                                             |
-| CI/deploy  | `.github/workflows/ci.yml` calls the reusable workflow `modular-forge/ci-web` (pinned by SHA): checks and build on every PR and push; deploy on push to `main` |
+| Layer      | Technology                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Framework  | Angular 22.2 (standalone, signals, zoneless)                                                                                                                                         |
+| Rendering  | Static prerender only: `outputMode: "static"`, `RenderMode.Prerender` for every route. `@angular/ssr` runs at build time; no server at runtime                                       |
+| Styles     | SCSS; design tokens in `src/styles.scss`. The visual design comes from Claude Design                                                                                                 |
+| i18n       | Angular built-in i18n (`@angular/localize`), `sourceLocale` `en`, Spanish translation in `src/locale/messages.es.xlf` (XLIFF 1.2), extraction and merge with `ng-extract-i18n-merge` |
+| Unit tests | Vitest through `ng test` (`@angular/build:unit-test`), 80 % global coverage thresholds in `angular.json`                                                                             |
+| Node / npm | Node 24 (`.nvmrc`), npm 11.19.1 (`packageManager`)                                                                                                                                   |
+| CI/deploy  | `.github/workflows/ci.yml` calls the reusable workflow `modular-forge/ci-web` (pinned by SHA): checks and build on every PR and push; deploy on push to `main`                       |
 
 ## Commands
 
 ```bash
-npm start              # dev server, localhost only (never add --host)
-npm run check          # format:check + lint + lint:styles + deps:validate + knip (pre-push hook)
+npm start              # dev server in English, localhost only (never add --host)
+npm run start:es       # dev server in Spanish, served at / (not /es/), localhost only
+npm run check          # format:check + lint + lint:styles + deps:validate + knip + i18n:check (pre-push hook)
 npm run test:ci        # unit tests with coverage thresholds
-npm run build          # production build (prerender)
+npm run build          # production build (prerender): dist/portfolio/browser/en/ and .../es/; runs i18n:check first
+npm run i18n:check     # fails on a translation unit without a usable <target>
+npm run extract-i18n   # extract texts and merge them into src/locale/messages.es.xlf
 npm run format         # fix formatting
 npx ng test --include <path/to/file.spec.ts> --watch=false   # one spec file
 npx ng generate <schematic> <name>                           # components, services…
@@ -176,14 +180,18 @@ Pull request and merge, once the user says the cycle is fine:
 src/
 ├── main.ts, main.server.ts        # browser and prerender entry points
 ├── styles.scss                    # global styles and design tokens
+├── locale/                        # XLIFF: messages.xlf (English, generated), messages.es.xlf
 └── app/
     ├── app.ts / app.html / app.scss   # shell: header, main, footer
     ├── app.config.ts, app.config.server.ts
     ├── app.routes.ts                  # client routes (lazy)
     ├── app.routes.server.ts           # prerender configuration
+    ├── i18n/                          # locales, page metadata, language switcher
     ├── projects/                      # planned: projects section
     └── contact/                       # planned: contact block
 public/                            # static assets copied as they are (project images in public/projects/)
+scripts/
+└── check-translations.mjs         # i18n:check: fails on untranslated units
 ```
 
 ## Agents
@@ -208,9 +216,11 @@ public/                            # static assets copied as they are (project i
   `ios` (`https://apps.apple.com/…`) and `code` (`https://github.com/…`, public repositories only).
   Link formats are TypeScript template literal types, so a malformed link fails to compile. If a
   product gets a web version of the app at another address, add `webApp`.
-- List and detail pages. `/projects/<slug>` is prerendered with `getPrerenderParams` and
-  `fallback: PrerenderFallback.Client` (an unknown slug shows a client-side "not found"). The URL
-  segment will be revisited when i18n is set up (a language prefix changes the URLs).
+- Visible text fields (`summary`, `description`, …) are `{ en, es }` (`.claude/rules/i18n.md`);
+  the type is added with this section.
+- List and detail pages. `/en/projects/<slug>` and `/es/projects/<slug>` are prerendered in their
+  locale build with `getPrerenderParams` and `fallback: PrerenderFallback.Client` (an unknown slug
+  shows a client-side "not found").
 - `projects.data.spec.ts` checks: unique and valid slugs, `date` as `YYYY-MM`, and at least one of
   `web`, `android` or `ios` in every `published` project.
 - Google Play and App Store badges: the official artwork, following their usage guidelines.
@@ -225,8 +235,8 @@ public/                            # static assets copied as they are (project i
 
 ### Hosting constraints
 
-- Static files only. Routes that are not prerendered fall back to `index.csr.html`, so every
-  route must also work client-side.
+- Static files only. Each locale folder has its own `index.csr.html`, the client-side fallback for
+  routes that are not prerendered, so every route must also work client-side in both locales.
 - The server sets the security headers. A Content-Security-Policy will be defined later: no inline
   `<script>`, third-party scripts, web fonts from other origins or trackers without asking.
 - CI writes `version.json` into the build output to check each deployment: never create
