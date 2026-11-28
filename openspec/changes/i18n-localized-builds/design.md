@@ -1,0 +1,236 @@
+# Design
+
+## Context
+
+- Angular 22.2 (`@angular/core` 22.2.4, `@angular/build` 22.2.5), static prerender
+  (`outputMode: "static"`, one `**` server route with `RenderMode.Prerender`), no routes yet.
+- `src/app/app.html` is still the Angular placeholder; there is no header. PF-4 replaces it.
+- `src/index.html` has `<html lang="en">` and `<base href="/">`.
+- Self-hosted fonts live in `public/fonts/` and `src/styles.scss` references them with root-absolute
+  URLs (`url('/fonts/…')`), decided in the `design-tokens` change.
+- CI (`modular-forge/ci-web`, pinned by SHA) publishes `dist/portfolio/browser` and its verify step
+  expects `index.html` at that root.
+- Option names below were checked against the installed schemas: `@angular/cli` workspace schema
+  (`i18n.sourceLocale`, `i18n.locales.<id>.translation`, `subPath` defaults to the locale code),
+  `@angular/build:application` (`localize`, `i18nMissingTranslation`) and
+  `@angular/build:extract-i18n` (`format` accepts `xlf`).
+
+## Goals / Non-Goals
+
+**Goals:**
+
+- Localization fixed at build time: no translation work in the browser, no hydration mismatch.
+- A translation file that carries context, readable in any XLIFF tool, merged automatically.
+- Locale-aware URLs computed in one place, shared by the switcher and the metadata.
+
+**Non-Goals:**
+
+- Server configuration in this repository, beyond the generic requirements in Decision 8.
+- A translated placeholder page.
+
+## Decisions
+
+### 1. Build-time i18n with `@angular/localize`, not a runtime library
+
+One build per locale, prerendered. Each locale gets complete HTML, its own URL, `lang` and
+`hreflang`, and works without JavaScript, which is what a public portfolio needs to be indexed and
+shared (see the spec). Rejected: Transloco or ngx-translate with one build. They switch language
+without a reload, but crawlers only see the prerendered language unless per-language routes are
+rebuilt by hand. Reading the language from storage on load also conflicts with hydration (flash of
+the other language), and the translations become a third-party dependency. The cost accepted here is
+a page load when switching language, which is cheap for static pages.
+
+### 2. Workspace configuration
+
+- Project `i18n`: `sourceLocale: "en"`, `locales: { "es": { "translation": "src/locale/messages.es.xlf" } }`.
+  No `subPath`/`baseHref`: the default (the locale code) gives `/en/` and `/es/`.
+- Build: `localize: true` and `i18nMissingTranslation: "error"` for production, so the deployed build
+  always contains both locales and never ships an untranslated text. `i18nDuplicateTranslation:
+  "error"` too, to catch a corrupted merge.
+- Development: the dev server serves one locale at a time. The default `development` configuration
+  serves English. An `es` build configuration holds only `localize: ["es"]`, and the `es` serve
+  configuration combines it with development (`portfolio:build:development,es`), so the development
+  options are not duplicated. `es` is only meant to be combined that way; on its own it would replace
+  `production` and skip its checks. `npm run start:es` serves Spanish at the dev server root
+  (`http://localhost:4200/`, `<html lang="es">`, `<base href="/">`), not under `/es/`: the prefix
+  only exists in the production build.
+- `ng add @angular/localize@22.2.4` installs the package and adds its polyfill and types to the
+  build, test and TypeScript configuration; the task checks what it changed instead of assuming it.
+
+### 3. Translation files: XLIFF 1.2 with Angular's hash IDs
+
+- Format `xlf` (XLIFF 1.2). It keeps each unit's meaning, description and source location, and is
+  the format every translation tool reads. Rejected: `json` (loses context), `xlf2` (thinner tool
+  support for no gain here), `arb` (only useful to share with Flutter).
+- Default hash IDs, no `@@custom` IDs. A hash is derived from the English text and its meaning, so a
+  changed English text gets a new ID. With `i18nMissingTranslation: "error"` the build then fails
+  until the Spanish is updated. That is the spec's "changed English text" scenario, for free.
+  Identical texts with the same meaning share one translation; a different meaning
+  (`i18n="meaning|description"`) separates them.
+- Every `i18n` attribute and `$localize` call gives a meaning and a description, so the XLIFF file
+  explains where each text appears.
+- Files: `src/locale/messages.xlf` (English source, generated) and `src/locale/messages.es.xlf`
+  (Spanish, committed and edited).
+
+### 4. Extraction and merge with `ng-extract-i18n-merge`
+
+`ng extract-i18n` only rewrites the source file. `ng-extract-i18n-merge` 3.5.0 (exact, dev) replaces
+the `extract-i18n` target with a builder that extracts and merges into `messages.es.xlf`. New units
+arrive marked for translation, removed units are deleted, existing translations are kept and the
+order is stable. It is installed with its own `ng add` schematic, which inferred `format: "xlf"`,
+`outputPath: "src/locale"` and `targetFiles: ["messages.es.xlf"]`; the version is then pinned
+exactly. An `extract-i18n` npm script runs it.
+
+Two defaults of the installed schema would let an untranslated text ship, against the spec, so they
+are overridden:
+
+- `newTranslationTargetsBlank: "omit"` (default `false` copies the English source into the new
+  `<target>`, which the build accepts as a translation).
+- `fuzzyMatch: false` (default `true` carries an old translation over to a changed English text by
+  similarity). A changed text must be translated again.
+
+That is not enough on its own. Angular's XLIFF 1.2 loader treats a unit with no `<target>` as a
+warning and falls back to its English `<source>` (checked in `@angular/localize`'s parser and in a
+build: `/es/` showed the English text and the build passed, with no warning printed).
+`i18nMissingTranslation: "error"` only fires when the unit is absent from the file, which is the
+case before extraction but not after the merge adds it.
+
+So `scripts/check-translations.mjs` (Node, no dependencies) closes the gap. It fails when a unit in a
+`src/locale/messages.*.xlf` translation file has no `<target>`, an empty one, or an XLIFF 1.2 state
+other than `translated`, `signed-off` or `final` (so `new` and every `needs-*` state fail), and names
+each source text. It also fails when the folder is missing or holds no translation file. It runs as
+`prebuild` (so `npm run build` fails before building), in `npm run check` (`i18n:check`, also run by
+the pre-push hook) and in CI: the pinned ci-web workflow already runs `npm run i18n:check
+--if-present` and builds with `npm run build`. Checked end to end with a temporary text:
+
+| Situation                                | Fails at                                     |
+| ---------------------------------------- | -------------------------------------------- |
+| New text, not extracted                  | Angular: `No translation found for "<id>"`   |
+| New text, extracted, not translated      | checker: `no <target> for "<text>"`          |
+| Translated                               | passes; `/es/` shows the Spanish             |
+| English text changed, not extracted      | Angular: `No translation found` (new hash)   |
+| English text changed, extracted          | checker; the old translation is removed      |
+| A `<target>` left in `state="new"`       | checker: `state="new"`                       |
+
+Rejected: dropping the merge tool and copying units by hand, which makes Angular fail on its own but
+loses the automatic merge the user asked for.
+
+`includeContext: true` with `includeContextLineNumber: false` adds each unit's source file to the
+XLIFF files without churn when lines move. Meaning and description are included by default.
+
+### 5. Locale helper: one source for supported locales and URLs
+
+`src/app/i18n/` holds:
+
+- the supported locales (`en`, `es`) with each one's own name ("English", "Español"), and the site
+  origin (`https://modular-forge.dev`) used for absolute `hreflang` URLs;
+- a pure function that builds the URL of a page path in a locale (`/es/` + path).
+
+The current locale comes from Angular's `LOCALE_ID`, which the localized build sets per locale.
+The current page path comes from the router, without the base href. Tests cover the function and
+both locales.
+
+### 6. Language switcher in a minimal shell header
+
+`app.html` gets a `<header>` with a switcher component above the placeholder. The switcher is a plain
+`<a href>` (not `routerLink`: the target is another build) to the current path in the other locale,
+with `lang` and `hreflang` set to the target and the target language's own name as text. Visible
+names of languages are deliberately not translated: each one is shown in its own language. Styles use
+the existing tokens only; layout of the real header is PF-4's job. Prerendering computes the `href`
+per page, so it works without JavaScript.
+
+The current path starts from `Location.path()` and then follows `NavigationEnd`. Not from
+`router.url`: in the browser the first navigation is non-blocking and ends after hydration, so
+`router.url` is still `/` at first, and a deep page would link to the other language's home for a
+moment. A test creates the switcher before any navigation to cover this.
+
+### 7. Page metadata service
+
+A root service sets, on every navigation: the `<title>` and meta description (translated with
+`$localize`), the `<link rel="alternate">` set (`en`, `es`, `x-default` → origin + `/`) and a
+self-referencing `<link rel="canonical">` to the page in the build's locale (from `LOCALE_ID`), so
+each language version is indexed as its own page. It replaces existing links instead of appending.
+`<html lang>` is not the service's job: the localized build already writes `<html lang="en"
+dir="ltr">` and `<html lang="es" dir="ltr">` into each locale's `index.html` (checked in the
+prerendered output).
+
+The service starts from `provideAppInitializer` and also runs while prerendering, so the metadata is
+in the static HTML. On the client, the first navigation replaces the prerendered alternates with
+identical ones (they live in `<head>`, outside the hydrated root), so nothing is duplicated.
+
+Constraints for later changes, not needed with today's single page:
+
+- The title is one site-wide text set on every navigation. When pages get their own titles (the
+  projects detail in PF-7), the title must move to a `TitleStrategy` that falls back to this text,
+  or the two would overwrite each other.
+- Unknown URLs (client fallback) also get the canonical and alternates; the not-found page should
+  drop them and add `noindex`.
+
+### 8. Hosting requirements (documented, configured outside the repository)
+
+The server that hosts the static files must:
+
+- redirect `/` with `302` to `/es/` when the first language in `Accept-Language` is `es` or `es-*`,
+  and to `/en/` otherwise, sending `Vary: Accept-Language`;
+- redirect `/en` and `/es` to the same path with a trailing slash;
+- inside `/en/` and `/es/`, serve the requested file, then the directory's `index.html`, then that
+  locale's `index.csr.html` (client-side fallback for routes that are not prerendered).
+
+Its configuration is kept privately with the server, not in this public repository.
+
+### 9. Fonts and public assets under a locale prefix
+
+With `localize`, `public/` is copied into each locale folder, so `/fonts/…` (root-absolute) points
+at the site root, where no locale build lives: checked in the built CSS, the fonts would 404.
+
+Chosen form: `url('../public/fonts/…')`, relative to `src/styles.scss`. The build resolves it,
+emits each font with a content hash into every locale's `media/` folder and rewrites the URL to
+`./media/<name>-<hash>.woff2`, which the browser resolves against the stylesheet (`/en/…`,
+`/es/…`). The hash also makes the fonts safe to cache long. The `public/` asset entry ignores
+`fonts/**/*.woff2` so the files are not shipped twice; the fonts README and licences are still
+copied.
+
+Rejected: `url('fonts/…')` without the leading slash. The build resolves relative URLs at compile
+time, finds nothing under `src/fonts/` and fails (`Could not resolve`). Moving the files out of
+`public/` would contradict the `design-tokens` decision for no gain.
+
+Checked in a browser against `dist/portfolio/browser` served locally: the four faces load with
+`200` from `/en/media/` and `/es/media/`, every request stays on the same origin, and
+`favicon.ico` (a relative `href`) resolves to `/en/favicon.ico` and `/es/favicon.ico`. The dev
+server (`npm start`) serves them from `/media/` with `200` too.
+
+Licences: the served files no longer sit next to their `OFL.txt`, so the `visual-theme` licence
+scenario changes (delta in this change). The licences stay published in each locale's
+`fonts/<family>/`, and `public/fonts/README.md`, also published, maps each served file to its family
+and licence. Rejected: dropping the `ignore` to keep a second, never-requested copy of every font
+next to its licence.
+
+### 10. Localized content in data files
+
+Typed data files store each visible text as an object with one value per locale (`{ en, es }`),
+read through `LOCALE_ID`. It keeps the content in one reviewed TypeScript file, keeps the template
+literal types of the links, and a missing language fails to compile. Adding a project stays a PR
+that only changes data. The type itself is added with the projects section (PF-7), where it is first
+used. Here it is recorded in `CLAUDE.md`.
+
+## Risks / Trade-offs
+
+- [Deploy breaks: ci-web verify looks for `browser/index.html`] → do not merge before CW-2 ships and
+  the pinned SHA in `ci.yml` is updated (a CI file change, asked for separately).
+- [Root `/` returns 404 until the server redirects] → the hosting configuration goes live together
+  with the merge (Migration Plan).
+- [`Accept-Language` matching only looks at the first language, not q-values] → good enough for two
+  languages; a visitor in the wrong language has the switcher.
+- [The dev server shows one locale at a time] → `start:es` script.
+- [A third-party builder in the translation workflow] → dev only, pinned, no install scripts. If it
+  breaks on an Angular update, `ng extract-i18n` plus a manual merge still works.
+- [Placeholder text stays English in `/es/`] → accepted until PF-4; it is not translated copy, it is
+  the scaffold.
+
+## Migration Plan
+
+1. Implement and open the PR. CI on the PR runs checks and build only.
+2. Before merging: CW-2 released in ci-web, `ci.yml` pinned to it, hosting configuration prepared.
+3. Merge. Then apply the hosting configuration and check `/`, `/en/`, `/es/`, a non-prerendered path
+   and the fonts in production.
+4. Rollback: revert the merge commit and restore the previous hosting configuration.

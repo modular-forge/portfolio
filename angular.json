@@ -18,6 +18,14 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+          "es": {
+            "translation": "src/locale/messages.es.xlf"
+          }
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -28,12 +36,14 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "ignore": ["fonts/**/*.woff2"]
               }
             ],
             "styles": ["src/styles.scss"],
             "server": "src/main.server.ts",
-            "outputMode": "static"
+            "outputMode": "static",
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {
@@ -49,12 +59,18 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "localize": true,
+              "i18nMissingTranslation": "error",
+              "i18nDuplicateTranslation": "error"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "es": {
+              "localize": ["es"]
             }
           },
           "defaultConfiguration": "production"
@@ -67,6 +83,9 @@
             },
             "development": {
               "buildTarget": "portfolio:build:development"
+            },
+            "es": {
+              "buildTarget": "portfolio:build:development,es"
             }
           },
           "defaultConfiguration": "development"
@@ -94,6 +113,19 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
+        },
+        "extract-i18n": {
+          "builder": "ng-extract-i18n-merge:ng-extract-i18n-merge",
+          "options": {
+            "buildTarget": "portfolio:build",
+            "format": "xlf",
+            "outputPath": "src/locale",
+            "targetFiles": ["messages.es.xlf"],
+            "newTranslationTargetsBlank": "omit",
+            "fuzzyMatch": false,
+            "includeContext": true,
+            "includeContextLineNumber": false
           }
         }
       }

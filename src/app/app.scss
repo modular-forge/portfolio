@@ -1,0 +1,10 @@
+// Minimal shell header until the home page (PF-4) designs the real one. It sets its own theme
+// colours because the Angular placeholder below forces a light, white background.
+.site-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-block-end: var(--border) solid var(--color-rule);
+  background: var(--color-bg);
+  color: var(--color-ink);
+}

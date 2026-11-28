@@ -2,7 +2,9 @@
 
 Self-hosted so that no request leaves the site's origin (see
 `openspec/changes/design-tokens/design.md`, decision 6). Each family is licensed under the SIL Open
-Font License 1.1; its `OFL.txt` sits next to its files.
+Font License 1.1; its `OFL.txt` sits next to its files in this folder and stays in
+`fonts/<family>/` on the published site, where the fonts themselves are served from `media/` (see
+"How the build serves them").
 
 ## Files
 
@@ -36,8 +38,19 @@ Licences: `ofl/fraunces/OFL.txt`, `ofl/inter/OFL.txt` and `ofl/jetbrainsmono/OFL
 To regenerate, request the query above with the same kind of user agent, download the `latin`
 `woff2` URLs and replace the files, keeping the names. The API may serve newer font versions.
 
-## Known follow-up
+## How the build serves them
 
-`src/styles.scss` loads these files from root-absolute URLs (`/fonts/...`). When i18n adds one
-prerendered build per language (PF-3), check that `/fonts/` is still served at the root; otherwise
-the fonts 404 and the fallback fonts hide the failure.
+`src/styles.scss` references these files relative to itself (`../public/fonts/...`). The build
+resolves each URL, emits the file with a content hash into every locale's `media/` folder and
+rewrites the URL to `./media/<name>-<hash>.woff2`, so the fonts load under `/en/` and `/es/` alike.
+A root-absolute URL (`/fonts/...`) would point at the site root, where no locale build lives.
+
+`angular.json` excludes the `woff2` files from the copy of `public/` to avoid shipping them twice;
+this README and the licences are still copied to each locale's `fonts/` folder.
+
+| Served file (in each locale)               | Family         | Licence                        |
+| ------------------------------------------ | -------------- | ------------------------------ |
+| `media/fraunces-roman-latin-<hash>.woff2`  | Fraunces       | `fonts/fraunces/OFL.txt`       |
+| `media/fraunces-italic-latin-<hash>.woff2` | Fraunces       | `fonts/fraunces/OFL.txt`       |
+| `media/inter-latin-<hash>.woff2`           | Inter          | `fonts/inter/OFL.txt`          |
+| `media/jetbrains-mono-latin-<hash>.woff2`  | JetBrains Mono | `fonts/jetbrains-mono/OFL.txt` |
